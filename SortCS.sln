@@ -5,24 +5,6 @@ VisualStudioVersion = 16.0.31313.381
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SortCS", "src\SortCS\SortCS.csproj", "{D3A9021E-D99C-4C3E-81DD-94B72256490A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SortCS.Evaluate", "src\SortCS.Evaluate\SortCS.Evaluate.csproj", "{F553ADE5-161C-41BD-A043-256EA8B8CBA3}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{73204E36-E5E3-4085-B2AA-AE97BAA3C548}"
-	ProjectSection(SolutionItems) = preProject
-		.bettercodehub.yml = .bettercodehub.yml
-		.editorconfig = .editorconfig
-		analyzers.targets = analyzers.targets
-		.github\workflows\build.yml = .github\workflows\build.yml
-		LICENSE = LICENSE
-		README.md = README.md
-		.github\workflows\release.yml = .github\workflows\release.yml
-		sonar-project.properties = sonar-project.properties
-	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SortCS.Tests", "src\SortCS.Tests\SortCS.Tests.csproj", "{13002E85-6B03-49DA-9700-906A24692C98}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SortCS.Benchmarks", "src\SortCS.Benchmarks\SortCS.Benchmarks.csproj", "{9A2468E6-4556-4C7C-8D29-996200A10EF3}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

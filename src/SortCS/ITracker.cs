@@ -1,9 +1,8 @@
 using System.Collections.Generic;
-using System.Drawing;
 
 namespace SortCS;
 
 public interface ITracker
 {
-    IEnumerable<Track> Track(IEnumerable<RectangleF> boxes);
+    IEnumerable<Track> Track(IEnumerable<Measurement> measurements);
 }

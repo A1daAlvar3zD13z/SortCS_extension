@@ -7,6 +7,10 @@ public record Track
 {
     public int TrackId { get; set; }
 
+    public float ClassId { get; set; }
+
+    public float Confidence { get; set; }
+
     public int TotalMisses { get; set; }
 
     public int Misses { get; set; }

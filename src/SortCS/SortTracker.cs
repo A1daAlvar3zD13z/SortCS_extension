@@ -30,7 +30,7 @@ public class SortTracker : ITracker
 
     public int MaxMisses { get; private init; }
 
-    public IEnumerable<Track> Track(IEnumerable<RectangleF> boxes)
+    public IEnumerable<Track> Track(IEnumerable<Measurement> measurements)
     {
         var predictions = new Dictionary<int, RectangleF>();
 
@@ -40,19 +40,22 @@ public class SortTracker : ITracker
             predictions.Add(tracker.Key, prediction);
         }
 
-        var boxesArray = boxes.ToArray();
 
-        var (matchedBoxes, unmatchedBoxes) = MatchDetectionsWithPredictions(boxesArray, predictions.Values);
+        var measurementsArray = measurements.ToArray();
+
+        var (matchedBoxes, unmatchedBoxes) = MatchDetectionsWithPredictions(measurementsArray, predictions.Values);
 
         var activeTrackids = new HashSet<int>();
         foreach (var item in matchedBoxes)
         {
             var prediction = predictions.ElementAt(item.Key);
             var track = _trackers[prediction.Key];
-            track.Track.History.Add(item.Value);
+            track.Track.History.Add(item.Value.bbox);
+            track.Track.ClassId = item.Value.classId;
+            track.Track.Confidence = item.Value.confidence;
             track.Track.Misses = 0;
             track.Track.State = TrackState.Active;
-            track.Tracker.Update(item.Value);
+            track.Tracker.Update(item.Value.bbox);
             track.Track.Prediction = prediction.Value;
 
             activeTrackids.Add(track.Track.TrackId);
@@ -80,13 +83,15 @@ public class SortTracker : ITracker
             var track = new Track
             {
                 TrackId = _trackerIndex++,
-                History = new List<RectangleF>() { unmatchedBox },
+                History = new List<RectangleF>() { unmatchedBox.bbox },
                 Misses = 0,
                 State = TrackState.Started,
                 TotalMisses = 0,
-                Prediction = unmatchedBox
+                Prediction = unmatchedBox.bbox,
+                ClassId = unmatchedBox.classId,
+                Confidence = unmatchedBox.confidence
             };
-            _trackers.Add(track.TrackId, (track, new KalmanBoxTracker(unmatchedBox)));
+            _trackers.Add(track.TrackId, (track, new KalmanBoxTracker(unmatchedBox.bbox)));
         }
 
         var result = _trackers.Select(x => x.Value.Track).Concat(toRemove.Select(y => y.Value.Track));
@@ -113,32 +118,32 @@ public class SortTracker : ITracker
         }
     }
 
-    private (Dictionary<int, RectangleF> Matched, ICollection<RectangleF> Unmatched) MatchDetectionsWithPredictions(
-        RectangleF[] boxes,
+    private (Dictionary<int, Measurement> Matched, ICollection<Measurement> Unmatched) MatchDetectionsWithPredictions(
+        Measurement[] measurements,
         ICollection<RectangleF> trackPredictions)
     {
         if (trackPredictions.Count == 0)
         {
-            return (new(), boxes);
+            return (new(), measurements);
         }
 
-        var matrix = new int[boxes.Length, trackPredictions.Count];
+        var matrix = new int[measurements.Length, trackPredictions.Count];
         var trackPredictionsArray = trackPredictions.ToArray();
 
-        for (var i = 0; i < boxes.Length; i++)
+        for (var i = 0; i < measurements.Length; i++)
         {
             for (var j = 0; j < trackPredictionsArray.Length; j++)
             {
-                matrix[i, j] = (int)(-100 * IoU(boxes[i], trackPredictionsArray[j]));
+                matrix[i, j] = (int)(-100 * IoU(measurements[i].bbox, trackPredictionsArray[j]));
             }
         }
 
-        if (boxes.Length > trackPredictions.Count)
+        if (measurements.Length > trackPredictions.Count)
         {
-            var extra = new int[boxes.Length - trackPredictions.Count];
-            matrix = Enumerable.Range(0, boxes.Length)
+            var extra = new int[measurements.Length - trackPredictions.Count];
+            matrix = Enumerable.Range(0, measurements.Length)
                 .SelectMany(row => Enumerable.Range(0, trackPredictions.Count).Select(col => matrix[row, col]).Concat(extra))
-                .ToArray(boxes.Length, boxes.Length);
+                .ToArray(measurements.Length, measurements.Length);
         }
 
         var original = (int[,])matrix.Clone();
@@ -148,14 +153,14 @@ public class SortTracker : ITracker
             .Where(bt => bt.ti < trackPredictions.Count && original[bt.bi, bt.ti] <= minimalThreshold)
             .ToDictionary(bt => bt.bi, bt => bt.ti);
 
-        var unmatchedBoxes = boxes.Where((_, index) => !boxTrackerMapping.ContainsKey(index)).ToArray();
-        var matchedBoxes = boxes.Select((box, index) => boxTrackerMapping.TryGetValue(index, out var tracker)
-                ? (Tracker: tracker, Box: box)
-                : (Tracker: -1, Box: RectangleF.Empty))
+        var unmatchedMeasurements = measurements.Where((_, index) => !boxTrackerMapping.ContainsKey(index)).ToArray();
+        var matchedMeasurements = measurements.Select((measurement, index) => boxTrackerMapping.TryGetValue(index, out var tracker)
+                ? (Tracker: tracker, Mess: measurement)
+                : (Tracker: -1, Mess: null))
             .Where(tb => tb.Tracker != -1)
-            .ToDictionary(tb => tb.Tracker, tb => tb.Box);
+            .ToDictionary(tb => tb.Tracker, tb => tb.Mess);
 
-        return (matchedBoxes, unmatchedBoxes);
+        return (matchedMeasurements, unmatchedMeasurements);
     }
 
     private static float IoU(RectangleF a, RectangleF b)
