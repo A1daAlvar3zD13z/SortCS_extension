@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using HungarianAlgorithm;
-using Microsoft.Extensions.Logging;
 using SortCS.Kalman;
 
 namespace SortCS;
@@ -10,7 +9,6 @@ namespace SortCS;
 public class SortTracker : ITracker
 {
     private readonly Dictionary<int, (Track Track, KalmanBoxTracker Tracker)> _trackers;
-    private readonly ILogger<SortTracker> _logger;
     private int _trackerIndex = 1; // MOT Evaluations requires a start index of 1
 
     public SortTracker(float iouThreshold = 0.3f, int maxMisses = 3)
@@ -18,12 +16,6 @@ public class SortTracker : ITracker
         _trackers = new Dictionary<int, (Track, KalmanBoxTracker)>();
         IouThreshold = iouThreshold;
         MaxMisses = maxMisses;
-    }
-
-    public SortTracker(ILogger<SortTracker> logger, float iouThreshold = 0.3f, int maxMisses = 3)
-        : this(iouThreshold, maxMisses)
-    {
-        _logger = logger;
     }
 
     public float IouThreshold { get; private init; }
@@ -95,28 +87,9 @@ public class SortTracker : ITracker
         }
 
         var result = _trackers.Select(x => x.Value.Track).Concat(toRemove.Select(y => y.Value.Track));
-        Log(result);
         return result;
     }
 
-    private void Log(IEnumerable<Track> tracks)
-    {
-        if (_logger == null || !tracks.Any())
-        {
-            return;
-        }
-
-        var tracksWithHistory = tracks.Where(x => x.History != null);
-        var longest = tracksWithHistory.Max(x => x.History.Count);
-        var anyStarted = tracksWithHistory.Any(x => x.History.Count == 1 && x.Misses == 0);
-        var ended = tracks.Count(x => x.State == TrackState.Ended);
-        if (anyStarted || ended > 0)
-        {
-            var tracksStr = tracks.Select(x => $"{x.TrackId}{(x.State == TrackState.Active ? null : $": {x.State}")}");
-
-            _logger.LogDebug("Tracks: [{Tracks}], Longest: {Longest}, Ended: {Ended}", string.Join(",", tracksStr), longest, ended);
-        }
-    }
 
     private (Dictionary<int, Measurement> Matched, ICollection<Measurement> Unmatched) MatchDetectionsWithPredictions(
         Measurement[] measurements,
