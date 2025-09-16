@@ -5,15 +5,15 @@
     <LangVersion>preview</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>  
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Authors>Kees Schollaart, Maarten van Sambeek</Authors>
+    <Authors>Kees Schollaart, Maarten van Sambeek, Aida Alvarez</Authors>
     <Company>Vision Intelligence</Company>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <AssemblyVersion>1.1.0.0</AssemblyVersion>
     <FileVersion>1.1.0.0</FileVersion>
     <Version>1.1.0.0</Version>
-    <Product>SortCS</Product>
-    <Summary>SortCS is a 'Multiple Object Tracker'.</Summary>
-    <Description>SortCS is a 'Multiple Object Tracker'</Description>
+    <Product>SortCS_extension</Product>
+    <Summary>SortCS_extension is a 'Multiple Object Tracker'.</Summary>
+    <Description>SortCS_extension is a 'Multiple Object Tracker'</Description>
     <PackageTags>Object, Tracking, Multiple, AI, Computer Vision, Vision</PackageTags>
     <PackageReleaseNotes>- Symbols package added to NuGet package.</PackageReleaseNotes>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
