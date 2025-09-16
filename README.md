@@ -1,5 +1,5 @@
 <h1 align="center">
-SortCS - A Multiple Object Tracker <i>Extension</i>
+SortCS_extension - A Multiple Object Tracker <i>Extension</i>
 </h1>
 
 SortCS_extension deploys a 'Multiple Object Tracker' as described in [this paper](https://arxiv.org/abs/1602.00763), implemented in C#.
